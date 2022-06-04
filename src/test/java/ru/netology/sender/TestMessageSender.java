@@ -10,19 +10,19 @@ import ru.netology.i18n.LocalizationService;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MessageSenderImplTest {
+public class TestMessageSender {
     private static long suiteStartTime;
     private long testStartTime;
 
     @BeforeAll
     public static void initSuite() {
-        System.out.println("Running All Tests");
+        System.out.println("Running All Tests MessageSender");
         suiteStartTime = System.nanoTime();
     }
 
     @AfterAll
     public static void completeSuite() {
-        System.out.println("All Tests completed in time: " + (System.nanoTime() - suiteStartTime));
+        System.out.println("All Tests MessageSender completed in time: " + (System.nanoTime() - suiteStartTime));
     }
 
     @BeforeEach
@@ -37,7 +37,7 @@ public class MessageSenderImplTest {
     }
 
     @org.junit.jupiter.api.Test
-    void test_send_rus() {
+    void testSendRus() {
         GeoService geoService = Mockito.mock(GeoService.class);
         Mockito.when(geoService.byIp(Mockito.anyString()))
                 .thenReturn(new Location("Moscow", Country.RUSSIA, null, 0));
@@ -51,6 +51,24 @@ public class MessageSenderImplTest {
         MessageSender messageSender = new MessageSenderImpl(geoService, localizationService);
         String country = messageSender.send(headers);
         String expected = localizationService.locale(Country.RUSSIA);
+        Assertions.assertEquals(country, expected);
+    }
+
+    @org.junit.jupiter.api.Test
+    void testSendEng() {
+        GeoService geoService = Mockito.mock(GeoService.class);
+        Mockito.when(geoService.byIp(Mockito.anyString()))
+                .thenReturn(new Location("New York", Country.USA, " 10th Avenue", 32));
+
+        LocalizationService localizationService = Mockito.mock(LocalizationService.class);
+        Mockito.when(localizationService.locale(Country.USA))
+                .thenReturn("Welcome");
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put(MessageSenderImpl.IP_ADDRESS_HEADER, "96.44.183.149");
+        MessageSender messageSender = new MessageSenderImpl(geoService, localizationService);
+        String country = messageSender.send(headers);
+        String expected = localizationService.locale(Country.USA);
         Assertions.assertEquals(country, expected);
     }
 }
